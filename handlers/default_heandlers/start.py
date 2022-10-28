@@ -19,4 +19,4 @@ def bot_start(message: Message):
                      f'Привет, {message.from_user.full_name}\n'
                      f'Чтоб отправить фотоотчет нажми соответсвующую кнопку.',
                      reply_markup=start_buttons())
-
+    print(message.from_user.id)

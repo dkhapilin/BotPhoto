@@ -5,7 +5,8 @@ def start_buttons():
     keyboard = InlineKeyboardMarkup(row_width=1)
     button_installation = InlineKeyboardButton(text='Монтаж', callback_data='Монтаж')
     button_repair = InlineKeyboardButton(text='Ремонт', callback_data='Ремонт')
-    keyboard.add(button_installation, button_repair)
+    button_dismantling = InlineKeyboardButton(text='Демонтаж', callback_data='Демонтаж')
+    keyboard.add(button_installation, button_repair, button_dismantling)
 
     return keyboard
 

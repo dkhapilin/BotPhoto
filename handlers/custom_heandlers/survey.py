@@ -6,7 +6,7 @@ from utils.check_and_create_directory import check_and_create_directory
 import pathlib
 
 
-PATH_DOWNLOAD = pathlib.Path.home() / 'Desktop' / 'фотоотчеты'
+PATH_DOWNLOAD = pathlib.Path.home() / 'photo'
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.type_of_work)
@@ -29,8 +29,8 @@ def choice_city(callback: CallbackQuery):
 
 @bot.message_handler(state=SurveyState.city)
 def choice_street(message: Message):
-    city = message.text
-    if city.isalpha():
+    city: str = message.text
+    if all(word.isalpha() for word in city.split()):
         with bot.retrieve_data(message.chat.id) as data:
             data['city'] = city
 
@@ -67,17 +67,14 @@ def download_photo(message: Message):
                     name_jpeg = f'{photo.file_unique_id}.jpeg'
                     path_save = pathlib.Path.absolute(path) / name_jpeg
                     print(path_save)
-                    with open(path_save, 'wb') as file:
-                        file.write(dwn_photo)
+                    with open(path_save, 'wb') as file_o:
+                        file_o.write(dwn_photo)
 
-        # bot.send_message(message.from_user.id, reply_markup=end())
+        bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
+                                      f'{file_type_work} {file_client} {file}.')
 
     else:
         bot.send_message(f'Нужно отправить фото.')
 
 
-# @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.album)
-# def end_photo(callback: CallbackQuery):
-#     if callback.data == '11222212':
-#         bot.send_message(callback.from_user.id, 'Фотоотчет принят.')
-#         bot.set_state(callback.from_user.id, SurveyState.main_menu)
+
