@@ -7,6 +7,7 @@ from keyboards.inlain.selection_buttons import client_buttons
 from utils.check_and_create_directory import check_and_create_directory
 from datetime import datetime
 import pathlib
+import re
 
 
 PATH_DOWNLOAD = pathlib.Path.home() / 'photo'
@@ -45,7 +46,8 @@ def choice_street(message: Message):
 
 @bot.message_handler(state=SurveyState.street)
 def album(message: Message):
-    street = message.text.split('>')
+    street = message.text
+    re.sub('[/\\,&^%$#@!)(*;:"]', '.', street)
 
     with bot.retrieve_data(message.chat.id) as data:
         data['street'] = ' '.join(street)
