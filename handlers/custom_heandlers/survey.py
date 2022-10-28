@@ -1,4 +1,6 @@
 from telebot.types import Message, CallbackQuery
+
+from keyboards.reply.button_exit import button_exit
 from loader import bot
 from states.states import SurveyState
 from keyboards.inlain.selection_buttons import client_buttons
@@ -47,6 +49,14 @@ def album(message: Message):
 
     with bot.retrieve_data(message.chat.id) as data:
         data['street'] = ' '.join(street)
+        file_type_work = data.get('type_work')
+        file_client = data.get('client')
+        file = f'{data.get("city")}, {data.get("street")}'
+        data_save = datetime.now()
+        path = pathlib.Path.absolute(PATH_DOWNLOAD) / data_save.strftime('%Y') / data_save.strftime(
+            '%m') / file_type_work / file_client / file
+        check_and_create_directory(path)
+        data['path'] = path
 
     bot.set_state(message.from_user.id, SurveyState.album, message.chat.id)
     bot.send_message(message.from_user.id, f'Отправляй фотоотчет.')
@@ -57,14 +67,9 @@ def download_photo(message: Message):
     if message.photo:
         photo_album = message.photo
         with bot.retrieve_data(message.chat.id) as data:
-            file_type_work = data.get('type_work')
-            file_client = data.get('client')
-            file = f'{data.get("city")}, {data.get("street")}'
-            data = datetime.now()
-            path = pathlib.Path.absolute(PATH_DOWNLOAD) / data.strftime('%Y') / data.strftime('%m')/ file_type_work / file_client / file
-            check_and_create_directory(path)
+            path = data['path']
             for photo in photo_album:
-                if photo.width >= 960:
+                if photo.width >= 760:
                     dwn_photo = bot.download_file(bot.get_file(photo.file_id).file_path)
                     name_jpeg = f'{photo.file_unique_id}.jpeg'
                     path_save = pathlib.Path.absolute(path) / name_jpeg
@@ -72,11 +77,15 @@ def download_photo(message: Message):
                     with open(path_save, 'wb') as file_o:
                         file_o.write(dwn_photo)
 
-        bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
-                                      f'{file_type_work} {file_client} {file}.')
+        bot.send_message(message.from_user.id, reply_markup=button_exit())
+
+    elif message.text.lower() == 'фотоотчет отправлен':
+        with bot.retrieve_data(message.chat.id) as data:
+            bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
+                                          f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}.')
 
     else:
-        bot.send_message(f'Нужно отправить фото.')
-
-
+        bot.send_message(f'Нужно отправить фото.'
+                         f'Или нажать кнопку "Фотоотчет отправлен"'
+                         f'Или написать "фотоотчет отправлен"')
 
