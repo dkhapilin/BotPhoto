@@ -1,4 +1,4 @@
-from telebot.types import Message, CallbackQuery
+from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 
 from keyboards.reply.button_exit import button_exit
 from loader import bot
@@ -59,33 +59,36 @@ def album(message: Message):
         data['path'] = path
 
     bot.set_state(message.from_user.id, SurveyState.album, message.chat.id)
-    bot.send_message(message.from_user.id, f'Отправляй фотоотчет.')
+    bot.send_message(message.from_user.id, f'Отправляй фотоотчет.\n'
+                                           f'Дождись отправки(загрузки) и нажми кнопку.\n'
+                                           f'"Фотоотчет отправлен"',
+                     reply_markup=button_exit())
 
 
-@bot.message_handler(content_types=['photo', 'text'], state=SurveyState.album)
+@bot.message_handler(content_types=['media_group_id', 'photo', 'text'], state=SurveyState.album)
 def download_photo(message: Message):
     if message.photo:
         photo_album = message.photo
         with bot.retrieve_data(message.chat.id) as data:
             path = data['path']
-            for photo in photo_album:
-                if photo.width >= 760:
-                    dwn_photo = bot.download_file(bot.get_file(photo.file_id).file_path)
-                    name_jpeg = f'{photo.file_unique_id}.jpeg'
-                    path_save = pathlib.Path.absolute(path) / name_jpeg
-                    print(path_save)
-                    with open(path_save, 'wb') as file_o:
-                        file_o.write(dwn_photo)
-
-        bot.send_message(message.from_user.id, reply_markup=button_exit())
+            photo = photo_album[-1]
+            dwn_photo = bot.download_file(bot.get_file(photo.file_id).file_path)
+            name_jpeg = f'{photo.file_unique_id}.jpeg'
+            path_save = pathlib.Path.absolute(path) / name_jpeg
+            print(path_save)
+            with open(path_save, 'wb') as file_o:
+                file_o.write(dwn_photo)
 
     elif message.text.lower() == 'фотоотчет отправлен':
         with bot.retrieve_data(message.chat.id) as data:
             bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
-                                          f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}.')
+                                      f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}.')
+            bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
+            bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
 
     else:
         bot.send_message(f'Нужно отправить фото.'
                          f'Или нажать кнопку "Фотоотчет отправлен"'
                          f'Или написать "фотоотчет отправлен"')
+
 

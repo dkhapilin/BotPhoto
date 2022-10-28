@@ -1,4 +1,4 @@
-from telebot.types import Message
+from telebot.types import Message, ReplyKeyboardRemove
 from loader import bot
 from keyboards.inlain.selection_buttons import start_buttons
 from states.states import SurveyState
