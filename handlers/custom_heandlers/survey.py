@@ -2,6 +2,7 @@ from telebot.types import Message, CallbackQuery
 from loader import bot
 from states.states import SurveyState
 from keyboards.inlain.selection_buttons import client_buttons
+from utils.check_and_create_directory import check_and_create_directory
 import pathlib
 
 
@@ -59,17 +60,24 @@ def download_photo(message: Message):
             file_client = data.get('client')
             file = f'{data.get("city")}, {data.get("street")}'
             path = pathlib.Path.absolute(PATH_DOWNLOAD) / file_type_work / file_client / file
-            print(path)
+            check_and_create_directory(path)
             for photo in photo_album:
                 if photo.width >= 960:
                     dwn_photo = bot.download_file(bot.get_file(photo.file_id).file_path)
                     name_jpeg = f'{photo.file_unique_id}.jpeg'
-                    path_save = pathlib.Path.absolute(PATH_DOWNLOAD) / name_jpeg
+                    path_save = pathlib.Path.absolute(path) / name_jpeg
                     print(path_save)
                     with open(path_save, 'wb') as file:
                         file.write(dwn_photo)
+
+        # bot.send_message(message.from_user.id, reply_markup=end())
 
     else:
         bot.send_message(f'Нужно отправить фото.')
 
 
+# @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.album)
+# def end_photo(callback: CallbackQuery):
+#     if callback.data == '11222212':
+#         bot.send_message(callback.from_user.id, 'Фотоотчет принят.')
+#         bot.set_state(callback.from_user.id, SurveyState.main_menu)

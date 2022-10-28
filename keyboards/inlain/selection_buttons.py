@@ -29,3 +29,8 @@ def client_buttons():
                  button_585)
 
     return keyboard
+
+
+def end():
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    button_end = InlineKeyboardButton(text='Фотоотчет отправлен.', callback_data='11222212')
