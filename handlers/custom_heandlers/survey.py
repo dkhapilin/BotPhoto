@@ -3,6 +3,7 @@ from loader import bot
 from states.states import SurveyState
 from keyboards.inlain.selection_buttons import client_buttons
 from utils.check_and_create_directory import check_and_create_directory
+from datetime import datetime
 import pathlib
 
 
@@ -59,7 +60,8 @@ def download_photo(message: Message):
             file_type_work = data.get('type_work')
             file_client = data.get('client')
             file = f'{data.get("city")}, {data.get("street")}'
-            path = pathlib.Path.absolute(PATH_DOWNLOAD) / file_type_work / file_client / file
+            data = datetime.now()
+            path = pathlib.Path.absolute(PATH_DOWNLOAD) / data.strftime('%Y') / data.strftime('%m')/ file_type_work / file_client / file
             check_and_create_directory(path)
             for photo in photo_album:
                 if photo.width >= 960:
