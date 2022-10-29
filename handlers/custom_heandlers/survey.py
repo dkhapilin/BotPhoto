@@ -15,6 +15,8 @@ PATH_DOWNLOAD = pathlib.Path.home() / 'photo'
 
 @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.type_of_work)
 def choice_client(callback: CallbackQuery):
+    bot.delete_message(callback.message.chat.id, callback.message.message_id)
+
     with bot.retrieve_data(callback.message.chat.id) as data:
         data['type_work'] = callback.data
     bot.send_message(callback.from_user.id,
@@ -25,6 +27,8 @@ def choice_client(callback: CallbackQuery):
 
 @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.client)
 def choice_city(callback: CallbackQuery):
+    bot.delete_message(callback.message.chat.id, callback.message.message_id)
+
     with bot.retrieve_data(callback.message.chat.id) as data:
         data['client'] = callback.data
     bot.set_state(callback.from_user.id, SurveyState.city, callback.message.chat.id)
