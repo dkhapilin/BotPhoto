@@ -47,7 +47,7 @@ def choice_street(message: Message):
 @bot.message_handler(state=SurveyState.street)
 def album(message: Message):
     street = message.text
-    re.sub('[/\\,&^%$#@!)(*;:"]', '.', street)
+    street = re.sub('[/\\,&^%$#@!)(*;:"]', '.', street)
 
     with bot.retrieve_data(message.chat.id) as data:
         data['street'] = ' '.join(street)
