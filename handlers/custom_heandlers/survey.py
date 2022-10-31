@@ -51,10 +51,11 @@ def choice_street(message: Message):
 @bot.message_handler(state=SurveyState.street)
 def album(message: Message):
     street = message.text
-    street = re.sub('[/\\,&^%$#@!)(*;:"]', '.', street)
+    street_new = re.sub(r'[\\/]', '.', street)
+    print(street_new)
 
     with bot.retrieve_data(message.chat.id) as data:
-        data['street'] = ' '.join(street)
+        data['street'] = street_new
         file_type_work = data.get('type_work')
         file_client = data.get('client')
         file = f'{data.get("city")}, {data.get("street")}'
@@ -88,7 +89,7 @@ def download_photo(message: Message):
     elif message.text.lower() == 'фотоотчет отправлен':
         with bot.retrieve_data(message.chat.id) as data:
             bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
-                                      f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}.')
+                                          f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}.')
             bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
 
