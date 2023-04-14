@@ -38,7 +38,7 @@ def choice_city(callback: CallbackQuery):
 @bot.message_handler(state=SurveyState.city)
 def choice_street(message: Message):
     city: str = message.text
-    if all(word.isalpha() for word in city.split()):
+    if all(word.isalpha() for word in city.split(" " or "-")):
         with bot.retrieve_data(message.chat.id) as data:
             data['city'] = city
 
@@ -54,13 +54,13 @@ def album(message: Message):
     street = re.sub('[/\\,&^%$#@!)(*;:"]', '.', street)
 
     with bot.retrieve_data(message.chat.id) as data:
-        data['street'] = ' '.join(street)
+        data['street'] = ''.join(street)
         file_type_work = data.get('type_work')
         file_client = data.get('client')
         file = f'{data.get("city")}, {data.get("street")}'
         data_save = datetime.now()
         path = pathlib.Path.absolute(PATH_DOWNLOAD) / data_save.strftime('%Y') / data_save.strftime(
-            '%m') / file_type_work / file_client / file
+            '%m') / file_type_work / file_client / file / message.from_user.full_name
         check_and_create_directory(path)
         data['path'] = path
 
@@ -88,7 +88,7 @@ def download_photo(message: Message):
     elif message.text.lower() == 'фотоотчет отправлен':
         with bot.retrieve_data(message.chat.id) as data:
             bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
-                                      f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}.')
+                                      f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}, {message.from_user.full_name}.')
             bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
 
