@@ -89,9 +89,13 @@ def download_photo(message: Message):
     elif message.text.lower() == 'фотоотчет отправлен':
         with bot.retrieve_data(message.chat.id) as data:
             bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
-                                      f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}, {message.from_user.full_name}.')
+                                          f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}, '
+                                          f'{message.from_user.full_name}.')
+
             bot.send_message('5137066133', f'Пришел новый фотоотчет.\n'
-                                                        f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}, {message.from_user.full_name}.')
+                                           f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}, '
+                                           f'{message.from_user.full_name}.')
+
             bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
 
