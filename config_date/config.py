@@ -10,6 +10,6 @@ else:
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 DEFAULT_COMMANDS = (
     ('start', 'Запустить бота'),
-    ('help', 'Вывести справку'),
-    ('add_photo', 'Добавить фотоотчет'),
+    # ('help', 'Вывести справку'),
+    # ('add_photo', 'Добавить фотоотчет'),
 )
