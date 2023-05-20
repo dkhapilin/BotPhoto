@@ -32,6 +32,14 @@ def client_buttons():
     return keyboard
 
 
+def add_user_button(id_user):
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    button_add = InlineKeyboardButton(text='Добавить', callback_data=id_user)
+    button_not_add = InlineKeyboardButton(text='Отказать', callback_data='Отказ')
+    keyboard.add(button_add, button_not_add)
+
+    return keyboard
+
 def end():
     keyboard = InlineKeyboardMarkup(row_width=1)
     button_end = InlineKeyboardButton(text='Фотоотчет отправлен.', callback_data='11222212')

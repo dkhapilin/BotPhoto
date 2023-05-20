@@ -8,3 +8,13 @@ class SurveyState(StatesGroup):
     city = State()
     street = State()
     album = State()
+
+
+class AddUserState(StatesGroup):
+    add_user = State()
+    info_user = State()
+
+
+class AdminState(StatesGroup):
+    admin_menu = State()
+

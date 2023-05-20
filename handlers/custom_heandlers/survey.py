@@ -6,14 +6,17 @@ from states.states import SurveyState
 from keyboards.inlain.selection_buttons import client_buttons
 from utils.check_and_create_directory import check_and_create_directory
 from datetime import datetime
+from database import management_db
 import pathlib
 import re
 
+CALL_WORK = ['Монтаж', 'Ремонт', 'Демонтаж']
+CALL_AGENT = ['МТС', 'Билайн', 'Мотив', 'Мегафон', 'Столото', 'Соколов', '585']
 
 PATH_DOWNLOAD = pathlib.Path.home() / 'photo'
 
 
-@bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.type_of_work)
+@bot.callback_query_handler(func=lambda callback: callback.data in CALL_WORK, state=SurveyState.type_of_work)
 def choice_client(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
 
@@ -25,7 +28,7 @@ def choice_client(callback: CallbackQuery):
     bot.set_state(callback.from_user.id, SurveyState.client, callback.message.chat.id)
 
 
-@bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.client)
+@bot.callback_query_handler(func=lambda callback: callback.data in CALL_AGENT, state=SurveyState.client)
 def choice_city(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
 
@@ -88,13 +91,11 @@ def download_photo(message: Message):
 
     elif message.text.lower() == 'фотоотчет отправлен':
         with bot.retrieve_data(message.chat.id) as data:
-            bot.send_message('802658189', f'Пришел новый фотоотчет.\n'
-                                          f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}, '
-                                          f'{message.from_user.full_name}.')
+            for admin in management_db.message_to_admins():
+                bot.send_message(f'{admin[0]}', f'Пришел новый фотоотчет.\n'
+                                                f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]},'
+                                                f'{message.from_user.full_name}.')
 
-            bot.send_message('5137066133', f'Пришел новый фотоотчет.\n'
-                                           f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]}, '
-                                           f'{message.from_user.full_name}.')
 
             bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
