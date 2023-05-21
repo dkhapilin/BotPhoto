@@ -140,8 +140,9 @@ def record_worker(telegram_id: int):
 
 
 def update_work_records(work_id):
-    with sqlite3.connect(PATH_DB) as db:
-        cur_db = db.cursor()
-        cur_db.execute(f'UPDATE work '
-                       f'SET records = "записал"'
-                       f'WHERE work_id IN {tuple(work_id) if len(work_id) > 1 else f"({work_id[0]})"} ')
+    if len(work_id) > 0:
+        with sqlite3.connect(PATH_DB) as db:
+            cur_db = db.cursor()
+            cur_db.execute(f'UPDATE work '
+                           f'SET records = "записал"'
+                           f'WHERE work_id IN {tuple(work_id) if len(work_id) > 1 else f"({work_id[0]})"} ')
