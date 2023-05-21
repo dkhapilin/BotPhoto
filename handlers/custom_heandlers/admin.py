@@ -1,8 +1,7 @@
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from loader import bot
 from states.states import AdminState, AddUserState
-from database import management_db
-from keyboards.inlain.selection_buttons import add_user_button
+from database import queries
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data, state=AddUserState.add_user)
@@ -20,9 +19,8 @@ def info_user(callback: CallbackQuery):
 @bot.message_handler(state=AddUserState.info_user)
 def add_user(message: Message):
     data_user = message.text.split('/')
-    print(data_user)
     with bot.retrieve_data(message.chat.id) as data:
-        new_user = management_db.add_user(data_user[0], int(data_user[1]), int(data['id']))
+        new_user = queries.add_user(data_user[0], int(data_user[1]), int(data['id']))
 
         bot.send_message(message.from_user.id, f'Добавлен новый пользователь:\n{new_user}')
         bot.send_message(data['id'], f'Вам дали доступ!\n'

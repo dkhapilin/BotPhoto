@@ -1,1 +1,1 @@
-from . import management_db
+from . import queries
