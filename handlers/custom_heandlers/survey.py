@@ -173,6 +173,6 @@ def repair_time_minutes(callback: CallbackQuery):
             bot.set_state(callback.from_user.id, SurveyState.street, callback.message.chat.id)
             print(data['repair_time'])
             bot.send_message(callback.from_user.id,
-                             f"Запись напарника(ов) прошла успешно.\n"
+                             f"Время ремонта записано.\n"
                              f"Нажми продолжить.",
                              reply_markup=button_next())

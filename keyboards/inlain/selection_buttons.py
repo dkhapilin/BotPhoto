@@ -97,9 +97,11 @@ def exit_button():
 
 def hours_button():
     keyboard = InlineKeyboardMarkup(row_width=3)
-    for hours in range(0, 13):
-        keyboard.add(InlineKeyboardButton(text=f"{hours}", callback_data=f"{hours}"))
-
+    for hours in range(0, 12, 3):
+        keyboard.add(InlineKeyboardButton(text=f"{hours}", callback_data=f"{hours}"),
+                     InlineKeyboardButton(text=f"{hours + 1}", callback_data=f"{hours + 1}"),
+                     InlineKeyboardButton(text=f"{hours + 2}", callback_data=f"{hours + 2}"), )
+    keyboard.add(InlineKeyboardButton(text=f"12", callback_data=f"12"))
     return keyboard
 
 
