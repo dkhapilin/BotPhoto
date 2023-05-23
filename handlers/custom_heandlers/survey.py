@@ -162,14 +162,13 @@ def download_photo(message: Message):
 @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.repair_time)
 def repair_time_minutes(callback: CallbackQuery):
     with bot.retrieve_data(callback.from_user.id) as data:
-
+        bot.delete_message(callback.message.chat.id, callback.message.message_id)
         if data['hours_flag']:
             data['hours_flag'] = False
             data['repair_time'] = callback.data + 'ч'
             bot.send_message(callback.from_user.id, f"Выбери сколько МИНУТ ты выполнял ремонт",
                              reply_markup=minutes_button())
         else:
-
             data['repair_time'] = data['repair_time'] + callback.data + 'мин'
             bot.set_state(callback.from_user.id, SurveyState.street, callback.message.chat.id)
             print(data['repair_time'])
