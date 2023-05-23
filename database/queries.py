@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 import pathlib
 
@@ -63,8 +64,8 @@ def history_worker(limit: int, telegram_id: int):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         user_id, users_name = search_user_id(telegram_id)
-        answer = cur_db.execute(f"SELECT agent, type_work, city, street, users_name, partner_name "
-                                f"FROM (SELECT agent, type_work, city, street, users_name, partner_name "
+        answer = cur_db.execute(f"SELECT agent, type_work, city, street, users_name, partner_name, date_work "
+                                f"FROM (SELECT agent, type_work, city, street, users_name, partner_name, date_work "
                                 f"FROM work w inner join users u on u.users_id = w.users_id "
                                 f"WHERE w.users_id = {user_id} "
                                 f"ORDER BY work_id DESC "
@@ -105,15 +106,15 @@ def append_work(telegram_id, agent, type_work, city, street, partner_id):
 
         for us_i in append_users:
 
-            cur_db.execute(f"INSERT INTO work (agent, type_work, city, street, users_id, partner_name) "
+            cur_db.execute(f"INSERT INTO work (agent, type_work, city, street, users_id, partner_name, date_work) "
                            f"VALUES ("
                            f"'{agent}', "
                            f"'{type_work}', "
                            f"'{city}', "
                            f"'{street}', "
                            f"{us_i}, "
-                           f"'{fio_partner}' "
-                           f")")
+                           f"'{fio_partner}', "
+                           f"'{datetime.date.today().isoformat()}')")
 
 
 def search_user_id(telegram_id: int):
@@ -128,8 +129,8 @@ def record_worker(telegram_id: int):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         user_id, users_name = search_user_id(telegram_id)
-        answer = cur_db.execute(f"SELECT work_id, agent, type_work, city, street, users_name, partner_name "
-                                f"FROM (SELECT work_id, agent, type_work, city, street, users_name, partner_name "
+        answer = cur_db.execute(f"SELECT work_id, agent, type_work, city, street, users_name, partner_name, date_work "
+                                f"FROM (SELECT work_id, agent, type_work, city, street, users_name, partner_name, date_work "
                                 f"FROM work w inner join users u on u.users_id = w.users_id "
                                 f"WHERE w.users_id = {user_id} AND records IS NULL "
                                 f"ORDER BY work_id DESC "

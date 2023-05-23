@@ -11,8 +11,8 @@ def show_history(message: Message):
         answer = queries.history_worker(int(message.text), message.from_user.id)
         count = 0
         for string in answer:
-            bot.send_message(message.from_user.id, f'{string[0]} {string[1]} {string[2]} {string[3]}\n'
-                                                   f'{string[5] if string[5] != "Один" else ""}')
+            bot.send_message(message.from_user.id, f'{string[6]} {string[0]} {string[1]} {string[2]} {string[3]}\n'
+                                                   f'{string[5]}')
             count += 1
 
         bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
@@ -30,7 +30,7 @@ def func_records(user_id):
     answer = queries.record_worker(user_id)
     count = 0
     for string in answer:
-        bot.send_message(user_id, f'{string[1]} {string[2]} {string[3]} {string[4]}\n'
+        bot.send_message(user_id, f'{string[7]} {string[1]} {string[2]} {string[3]} {string[4]}\n'
                                   f'{string[6] if string[6] != "Один" else ""}',
                          reply_markup=selection_buttons.record_button(string[0]))
         count += 1
