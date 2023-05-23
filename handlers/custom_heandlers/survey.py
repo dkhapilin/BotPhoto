@@ -102,10 +102,10 @@ def album(callback: CallbackQuery):
     with bot.retrieve_data(callback.message.chat.id) as data:
         file_type_work = data.get('type_work')
         file_client = data.get('client')
-        file = f'{data.get("city")}, {data.get("street")}'
+        file = f'{data.get("city")}, {data.get("street")}, {callback.from_user.full_name}'
         data_save = datetime.now()
         path = pathlib.Path.absolute(PATH_DOWNLOAD) / data_save.strftime('%Y') / data_save.strftime(
-            '%m') / file_type_work / file_client / file / callback.from_user.full_name
+            '%m') / file_type_work / file_client / file
         check_and_create_directory(path)
         data['path'] = path
 
