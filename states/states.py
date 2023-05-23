@@ -10,6 +10,8 @@ class SurveyState(StatesGroup):
     count_partner = State()
     partner = State()
     album = State()
+    repair = State()
+    repair_time = State()
 
 
 class AddUserState(StatesGroup):

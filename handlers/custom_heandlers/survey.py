@@ -3,7 +3,7 @@ from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.reply.button_exit import button_exit
 from loader import bot
 from states.states import SurveyState
-from keyboards.inlain.selection_buttons import client_buttons, show_partner, number, button_next
+from keyboards.inlain.selection_buttons import client_buttons, show_partner, number, button_next, hours_button, minutes_button
 from utils.check_and_create_directory import check_and_create_directory
 from datetime import datetime
 from database import queries
@@ -85,15 +85,22 @@ def choice_partner(callback: CallbackQuery):
             if int(callback.data) != 0:
                 data['partner_id'].append(int(callback.data))
             data['counter'] = 0
-            bot.set_state(callback.from_user.id, SurveyState.street, callback.message.chat.id)
-            bot.send_message(callback.from_user.id,
-                             f"Запись напарника(ов) прошла успешно.\n"
-                             f"Нажми продолжить.",
-                             reply_markup=button_next())
+            if data['type_work'] == 'Ремонт':
+                bot.set_state(callback.from_user.id, SurveyState.repair_time, callback.message.chat.id)
+                bot.send_message(callback.from_user.id, f"Выбери сколько ЧАСОВ ты выполнял ремонт",
+                                 reply_markup=hours_button())
+                data['hours_flag'] = True
+            else:
+                bot.set_state(callback.from_user.id, SurveyState.street, callback.message.chat.id)
+                bot.send_message(callback.from_user.id,
+                                 f"Запись напарника(ов) прошла успешно.\n"
+                                 f"Нажми продолжить.",
+                                 reply_markup=button_next())
 
             if len(data['partner_id']) > 0:
                 for users_id in data['partner_id']:
-                    bot.send_message(users_id, f'{queries.search_user_id(callback.from_user.id)[1]} добавил вас в монтаж.')
+                    bot.send_message(users_id, f'{queries.search_user_id(callback.from_user.id)[1]} '
+                                               f'добавил вас в {data["type_work"]}.')
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.street)
@@ -140,8 +147,8 @@ def download_photo(message: Message):
                                 data['type_work'],
                                 data['city'],
                                 data['street'],
-                                data['partner_id']
-                                )
+                                data['partner_id'],
+                                data.get('repair_time'))
             bot.delete_message(message.chat.id, message.message_id - 1)
             bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
@@ -150,3 +157,23 @@ def download_photo(message: Message):
         bot.send_message(f'Нужно отправить фото.'
                          f'Или нажать кнопку "Фотоотчет отправлен"'
                          f'Или написать "фотоотчет отправлен"')
+
+
+@bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.repair_time)
+def repair_time_minutes(callback: CallbackQuery):
+    with bot.retrieve_data(callback.from_user.id) as data:
+
+        if data['hours_flag']:
+            data['hours_flag'] = False
+            data['repair_time'] = callback.data + 'ч'
+            bot.send_message(callback.from_user.id, f"Выбери сколько МИНУТ ты выполнял ремонт",
+                             reply_markup=minutes_button())
+        else:
+
+            data['repair_time'] = data['repair_time'] + callback.data + 'мин'
+            bot.set_state(callback.from_user.id, SurveyState.street, callback.message.chat.id)
+            print(data['repair_time'])
+            bot.send_message(callback.from_user.id,
+                             f"Запись напарника(ов) прошла успешно.\n"
+                             f"Нажми продолжить.",
+                             reply_markup=button_next())
