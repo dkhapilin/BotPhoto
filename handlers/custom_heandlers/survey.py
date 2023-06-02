@@ -123,7 +123,7 @@ def album(callback: CallbackQuery):
                      reply_markup=button_exit())
 
 
-@bot.message_handler(content_types=['media_group_id', 'photo', 'text'], state=SurveyState.album)
+@bot.message_handler(content_types=['media_group_id', 'document', 'photo', 'text'], state=SurveyState.album)
 def download_photo(message: Message):
     if message.photo:
         photo_album = message.photo
@@ -136,6 +136,16 @@ def download_photo(message: Message):
             with open(path_save, 'wb') as file_o:
                 file_o.write(dwn_photo)
 
+    elif message.document:
+        photo_document = message.document
+        with bot.retrieve_data(message.chat.id) as data:
+            path = data['path']
+            photo = photo_document.file_id
+            dwn_photo = bot.download_file(bot.get_file(photo).file_path)
+            name_jpeg = f'{photo_document.file_unique_id}.jpeg'
+            path_save = pathlib.Path.absolute(path) / name_jpeg
+            with open(path_save, 'wb') as file_o:
+                file_o.write(dwn_photo)
     elif message.text.lower() == 'фотоотчет отправлен':
         with bot.retrieve_data(message.chat.id) as data:
             for admin in queries.message_to_admins():
