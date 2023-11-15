@@ -21,6 +21,7 @@ def client_buttons():
     button_Stoloto = InlineKeyboardButton(text='Столото', callback_data='Столото')
     button_Sokolov = InlineKeyboardButton(text='Соколов', callback_data='Соколов')
     button_585 = InlineKeyboardButton(text='585', callback_data='585')
+    button_Sunlight = InlineKeyboardButton(text='Санлайт', callback_data='Санлайт')
 
     keyboard.add(button_MTC,
                  button_Bilain,
@@ -28,7 +29,8 @@ def client_buttons():
                  button_Motiv,
                  button_Stoloto,
                  button_Sokolov,
-                 button_585)
+                 button_585,
+                 button_Sunlight)
 
     return keyboard
 

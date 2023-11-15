@@ -67,9 +67,9 @@ def count_part(message: Message):
 
 @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.partner)
 def choice_partner(callback: CallbackQuery):
-    bot.delete_message(callback.message.chat.id, callback.message.message_id)
     with bot.retrieve_data(callback.from_user.id) as data:
         if int(callback.data) in (1, 2, 3, 4, 5):
+            bot.delete_message(callback.message.chat.id, callback.message.message_id)
             count = int(callback.data)
 
             data['count_partner'] = count
@@ -91,6 +91,7 @@ def choice_partner(callback: CallbackQuery):
                                  reply_markup=hours_button())
                 data['hours_flag'] = True
             else:
+                bot.delete_message(callback.message.chat.id, callback.message.message_id)
                 bot.set_state(callback.from_user.id, SurveyState.street, callback.message.chat.id)
                 bot.send_message(callback.from_user.id,
                                  f"Запись напарника(ов) прошла успешно.\n"
