@@ -58,8 +58,17 @@ def show_partner():
     keyboard = InlineKeyboardMarkup(row_width=3)
     button_null = InlineKeyboardButton(text="Делал один", callback_data='Null')
     all_partner = queries.show_worker()
-    for users_name, users_id in all_partner:
-        keyboard.add(InlineKeyboardButton(text=users_name, callback_data=users_id))
+    for num in range(0, len(all_partner), 3):
+        if len(all_partner) > num + 2:
+            keyboard.add(InlineKeyboardButton(text=all_partner[num][0], callback_data=all_partner[num][1]),
+                         InlineKeyboardButton(text=all_partner[num+1][0], callback_data=all_partner[num+1][1]),
+                         InlineKeyboardButton(text=all_partner[num+2][0], callback_data=all_partner[num+2][1]))
+        elif len(all_partner) > num + 1:
+            keyboard.add(InlineKeyboardButton(text=all_partner[num][0], callback_data=all_partner[num][1]),
+                         InlineKeyboardButton(text=all_partner[num + 1][0], callback_data=all_partner[num + 1][1]))
+        else:
+            keyboard.add(InlineKeyboardButton(text=all_partner[num][0], callback_data=all_partner[num][1]))
+
     keyboard.add(button_null)
     return keyboard
 
