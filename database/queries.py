@@ -15,8 +15,8 @@ def users_list():
 def add_user(user_name, access, telegram_id):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
-        cur_db.execute(f"INSERT INTO users(users_name, access, telegram_id)"
-                       f"VALUES ('{user_name}', {access}, {telegram_id});")
+        cur_db.execute(f"INSERT INTO users(users_name, access, telegram_id, employment)"
+                       f"VALUES ('{user_name}', {access}, {telegram_id}, 'Yes');")
         new_user = cur_db.execute(f"SELECT * FROM users "
                                   f"ORDER BY users_id DESC "
                                   f"LIMIT 1 ").fetchall()
@@ -80,7 +80,7 @@ def history_worker(limit: int, telegram_id: int):
 def show_worker():
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
-        answer = cur_db.execute(f"SELECT users_name, telegram_id FROM users WHERE access = 1").fetchall()
+        answer = cur_db.execute(f"SELECT users_name, telegram_id FROM users WHERE access = 1 AND employment = 'Yes'").fetchall()
 
         return answer
 
