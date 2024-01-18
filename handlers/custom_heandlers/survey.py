@@ -160,7 +160,7 @@ def download_photo(message: Message):
                                 data['street'],
                                 data['partner_id'],
                                 data.get('repair_time'))
-            bot.delete_message(message.chat.id, message.message_id - 1)
+            bot.delete_message(message.chat.id, message.message_id)
             bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
 
