@@ -24,6 +24,7 @@ class AdminState(StatesGroup):
     state_maling_two = State()
     state_maling_photo = State()
     state_maling_documents = State()
+    state_maling_text = State()
 
 
 class HistoryStates:

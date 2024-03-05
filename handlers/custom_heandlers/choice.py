@@ -20,4 +20,7 @@ def choice_main_menu(callback: CallbackQuery):
             func_records(callback.from_user.id)
         case 'maling':
             bot.set_state(callback.from_user.id, AdminState.state_maling_one, callback.message.chat.id)
-            bot.send_message(callback.from_user.id, f'Напишите(пришлите), что нужно отправить.')
+            bot.send_message(callback.from_user.id, f'Напишите или пришлите файл(фото), что нужно отправить.')
+            with bot.retrieve_data(callback.message.chat.id) as data:
+                data['photo_id'] = list()
+                data['document_id'] = list()

@@ -9,7 +9,8 @@ def users_list():
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         users = cur_db.execute(f"SELECT * FROM users").fetchall()
-        pass
+
+    return users
 
 
 def add_user(user_name, access, telegram_id):
