@@ -2,7 +2,7 @@ from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from loader import bot
 from states.states import AdminState, AddUserState, SurveyState
 from database import queries
-from database.queries import show_worker
+from database.queries import users_list
 import keyboards
 
 
@@ -81,12 +81,12 @@ def maling_func(message: Message):
 @bot.callback_query_handler(func=lambda callback: callback.data, state=AdminState.state_maling_photo)
 def maling_photo(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.id)
-    members = show_worker()
+    members = users_list()
     if callback.data == 'yes':
         with bot.retrieve_data(callback.message.chat.id) as data:
             for member in members:
                 for photo in data['photo_id']:
-                    bot.send_photo(member, photo)
+                    bot.send_photo(member[1], photo)
 
         bot.send_message(callback.from_user.id, f'Фото отправлены.', reply_markup=ReplyKeyboardRemove())
     else:
@@ -97,12 +97,12 @@ def maling_photo(callback: CallbackQuery):
 @bot.callback_query_handler(func=lambda callback: callback.data, state=AdminState.state_maling_documents)
 def maling_documents(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.id)
-    members = show_worker()
+    members = users_list()
     if callback.data == 'yes':
         with bot.retrieve_data(callback.message.chat.id) as data:
             for member in members:
                 for document in data['document_id']:
-                    bot.send_document(member, document)
+                    bot.send_document(member[1], document)
         bot.send_message(callback.from_user.id, f'Документы отправлены.', reply_markup=ReplyKeyboardRemove())
     else:
         bot.send_message(callback.from_user.id, f'Отправка отменена.', reply_markup=ReplyKeyboardRemove())
@@ -112,11 +112,11 @@ def maling_documents(callback: CallbackQuery):
 @bot.callback_query_handler(func=lambda callback: callback.data, state=AdminState.state_maling_text)
 def maling_text(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.id)
-    members = show_worker()
+    members = users_list()
     if callback.data == 'yes':
         for member in members:
             with bot.retrieve_data(callback.message.chat.id) as data:
-                bot.send_message(member, data['text'])
+                bot.send_message(member[1], data['text'])
         bot.send_message(callback.from_user.id, f'Сообщение отправлено.', reply_markup=ReplyKeyboardRemove())
     else:
         bot.send_message(callback.from_user.id, f'Отправка отменена.', reply_markup=ReplyKeyboardRemove())

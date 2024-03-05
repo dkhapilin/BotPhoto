@@ -8,7 +8,7 @@ PATH_DB = pathlib.Path.cwd() / 'database' / 'data_base'
 def users_list():
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
-        users = cur_db.execute(f"SELECT * FROM users").fetchall()
+        users = cur_db.execute(f"SELECT users_name, telegram_id FROM users WHERE employment = 'Yes'").fetchall()
 
     return users
 
