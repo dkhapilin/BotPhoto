@@ -37,7 +37,6 @@ def add_user(message: Message):
 def maling_func(message: Message):
     global REPEAT
     if message.text:
-        ReplyKeyboardRemove(message.from_user.id)
         text = message.text
         if text == 'Отправить фото.':
             with bot.retrieve_data(message.chat.id) as data:

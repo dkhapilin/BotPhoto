@@ -147,7 +147,7 @@ def download_photo(message: Message):
             path_save = pathlib.Path.absolute(path) / name_jpeg
             with open(path_save, 'wb') as file_o:
                 file_o.write(dwn_photo)
-    elif message.text.lower() == 'Фотоотчет отправлен.':
+    elif message.text.lower() == 'фотоотчет отправлен.':
         with bot.retrieve_data(message.chat.id) as data:
             for admin in queries.message_to_admins():
                 bot.send_message(f'{admin[0]}', f'Пришел новый фотоотчет.\n'
