@@ -17,17 +17,17 @@ def bot_start(message: Message):
     """
     bot.delete_message(message.chat.id, message.message_id)
     match queries.check_user(message.from_user.id):
-        case 1 | 2 | 3:
+        case 1:
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
             bot.send_message(message.from_user.id,
                              f'Привет, {message.from_user.full_name}\n'
                              f'Выбери пункт меню.',
                              reply_markup=selection_buttons.start_buttons_one())
-        # case 2 | 3:
-        #     bot.set_state(message.from_user.id, AdminState.admin_menu, message.chat.id)
-        #     bot.send_message(message.from_user.id,
-        #                      f'Привет, {message.from_user.full_name}\n',
-        #                      reply_markup=selection_buttons.start_buttons_two())
+        case 2 | 3:
+            bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
+            bot.send_message(message.from_user.id,
+                             f'Привет, {message.from_user.full_name}\n',
+                             reply_markup=selection_buttons.start_buttons_two())
 
         case _:
             bot.send_message(message.from_user.id, f'Вас нет в списке разрешенных пользователей.'   

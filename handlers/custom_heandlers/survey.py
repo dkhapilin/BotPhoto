@@ -121,7 +121,7 @@ def album(callback: CallbackQuery):
     bot.send_message(callback.from_user.id, f'Отправляй фотоотчет.\n'
                                             f'Дождись отправки(загрузки) и нажми кнопку.\n'
                                             f'"Фотоотчет отправлен"',
-                     reply_markup=button_exit())
+                     reply_markup=button_exit('Фотоотчет отправлен.'))
 
 
 @bot.message_handler(content_types=['media_group_id', 'document', 'photo', 'text'], state=SurveyState.album)
@@ -147,7 +147,7 @@ def download_photo(message: Message):
             path_save = pathlib.Path.absolute(path) / name_jpeg
             with open(path_save, 'wb') as file_o:
                 file_o.write(dwn_photo)
-    elif message.text.lower() == 'фотоотчет отправлен':
+    elif message.text.lower() == 'фотоотчет отправлен.':
         with bot.retrieve_data(message.chat.id) as data:
             for admin in queries.message_to_admins():
                 bot.send_message(f'{admin[0]}', f'Пришел новый фотоотчет.\n'

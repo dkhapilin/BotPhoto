@@ -20,7 +20,11 @@ class AddUserState(StatesGroup):
 
 
 class AdminState(StatesGroup):
-    admin_menu = State()
+    state_maling_one = State()
+    state_maling_two = State()
+    state_maling_photo = State()
+    state_maling_documents = State()
+    state_maling_text = State()
 
 
 class HistoryStates:

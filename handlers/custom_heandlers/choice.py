@@ -1,6 +1,6 @@
 from loader import bot
 from telebot.types import CallbackQuery
-from states.states import SurveyState, HistoryStates
+from states.states import SurveyState, HistoryStates, AdminState
 from keyboards.inlain import selection_buttons
 from handlers.custom_heandlers.history import func_records
 
@@ -18,3 +18,9 @@ def choice_main_menu(callback: CallbackQuery):
         case 'dont_records':
             bot.set_state(callback.from_user.id, HistoryStates.records, callback.message.chat.id)
             func_records(callback.from_user.id)
+        case 'maling':
+            bot.set_state(callback.from_user.id, AdminState.state_maling_one, callback.message.chat.id)
+            bot.send_message(callback.from_user.id, f'Напишите или пришлите файл(фото), что нужно отправить.')
+            with bot.retrieve_data(callback.message.chat.id) as data:
+                data['photo_id'] = list()
+                data['document_id'] = list()

@@ -14,23 +14,23 @@ def type_work():
 
 def client_buttons():
     keyboard = InlineKeyboardMarkup(row_width=1)
-    button_MTC = InlineKeyboardButton(text='МТС', callback_data='МТС')
-    button_Bilain = InlineKeyboardButton(text='Билайн', callback_data='Билайн')
-    button_Motiv = InlineKeyboardButton(text='Мотив', callback_data='Мотив')
-    button_Megafon = InlineKeyboardButton(text='Мегафон', callback_data='Мегафон')
-    button_Stoloto = InlineKeyboardButton(text='Столото', callback_data='Столото')
-    button_Sokolov = InlineKeyboardButton(text='Соколов', callback_data='Соколов')
+    button_mts = InlineKeyboardButton(text='МТС', callback_data='МТС')
+    button_bilain = InlineKeyboardButton(text='Билайн', callback_data='Билайн')
+    button_motiv = InlineKeyboardButton(text='Мотив', callback_data='Мотив')
+    button_megafon = InlineKeyboardButton(text='Мегафон', callback_data='Мегафон')
+    button_stoloto = InlineKeyboardButton(text='Столото', callback_data='Столото')
+    button_sokolov = InlineKeyboardButton(text='Соколов', callback_data='Соколов')
     button_585 = InlineKeyboardButton(text='585', callback_data='585')
-    button_Sunlight = InlineKeyboardButton(text='Санлайт', callback_data='Санлайт')
+    button_sunlight = InlineKeyboardButton(text='Санлайт', callback_data='Санлайт')
 
-    keyboard.add(button_MTC,
-                 button_Bilain,
-                 button_Megafon,
-                 button_Motiv,
-                 button_Stoloto,
-                 button_Sokolov,
+    keyboard.add(button_mts,
+                 button_bilain,
+                 button_megafon,
+                 button_motiv,
+                 button_stoloto,
+                 button_sokolov,
                  button_585,
-                 button_Sunlight)
+                 button_sunlight)
 
     return keyboard
 
@@ -50,6 +50,14 @@ def start_buttons_one():
     button_history = InlineKeyboardButton(text='Посмотреть историю работ.', callback_data='history_unique')
     button_history_records = InlineKeyboardButton(text='Не записанные работы', callback_data='dont_records')
     keyboard.add(button_client, button_history, button_history_records)
+
+    return keyboard
+
+
+def start_buttons_two():
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    button_maling = InlineKeyboardButton(text='Рассылка', callback_data='maling')
+    keyboard.add(button_maling)
 
     return keyboard
 
@@ -120,5 +128,14 @@ def minutes_button():
     keyboard = InlineKeyboardMarkup(row_width=3)
     for hours in range(0, 60, 15):
         keyboard.add(InlineKeyboardButton(text=f"{hours}", callback_data=f"{hours}"))
+
+    return keyboard
+
+
+def buttons_yes_or_not():
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    button_yes = InlineKeyboardButton(text=f'Да', callback_data='yes')
+    button_not = InlineKeyboardButton(text=f'Нет', callback_data='not')
+    keyboard.add(button_yes, button_not)
 
     return keyboard
