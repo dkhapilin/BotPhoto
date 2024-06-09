@@ -1,14 +1,16 @@
+import pathlib
+import re
+from datetime import datetime
+
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 
+from database import queries
+from keyboards.inlain.selection_buttons import (client_buttons, show_partner, number,
+                                                button_next, hours_button, minutes_button)
 from keyboards.reply.button_exit import button_exit
 from loader import bot
 from states.states import SurveyState
-from keyboards.inlain.selection_buttons import client_buttons, show_partner, number, button_next, hours_button, minutes_button
 from utils.check_and_create_directory import check_and_create_directory
-from datetime import datetime
-from database import queries
-import pathlib
-import re
 
 CALL_WORK = ['Монтаж', 'Ремонт', 'Демонтаж']
 CALL_AGENT = ['МТС', 'Билайн', 'Мотив', 'Мегафон', 'Столото', 'Соколов', '585', 'Санлайт']
@@ -75,7 +77,7 @@ def choice_partner(callback: CallbackQuery):
             data['count_partner'] = count
 
             bot.send_message(callback.from_user.id, f'Выбери напарников с кем выполнял работу.',
-                             reply_markup=show_partner())
+                             reply_markup=show_partner(callback.from_user.id))
 
         elif callback.data and data['counter'] < data['count_partner'] - 1:
             data['counter'] += 1

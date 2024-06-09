@@ -1,6 +1,9 @@
 import datetime
-import sqlite3
 import pathlib
+import sqlite3
+from typing import List
+
+import pandas as pd
 
 PATH_DB = pathlib.Path.cwd() / 'database' / 'data_base'
 
@@ -61,7 +64,7 @@ def message_to_main_admin():
         return answer
 
 
-def history_worker(limit: int, telegram_id: int):
+def history_worker_count(limit: int, telegram_id: int):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         user_id, users_name = search_user_id(telegram_id)
@@ -81,13 +84,13 @@ def history_worker(limit: int, telegram_id: int):
 def show_worker():
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
-        answer = cur_db.execute(f"SELECT users_name, telegram_id FROM users WHERE access = 1 AND employment = 'Yes'").fetchall()
+        answer = cur_db.execute(
+            f"SELECT users_name, telegram_id FROM users WHERE access = 1 AND employment = 'Yes'").fetchall()
 
         return answer
 
 
 def append_work(telegram_id, agent, type_work, city, street, partner_id, time_repair=None):
-
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         users_id, _ = search_user_id(telegram_id)
@@ -108,7 +111,6 @@ def append_work(telegram_id, agent, type_work, city, street, partner_id, time_re
                 append_users.append(a[0])
 
         for us_i in append_users:
-
             cur_db.execute(f"INSERT INTO work (agent, type_work, city, street, users_id, partner_name, "
                            f"date_work, time_repair) "
                            f"VALUES ("
@@ -125,7 +127,8 @@ def append_work(telegram_id, agent, type_work, city, street, partner_id, time_re
 def search_user_id(telegram_id: int):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
-        users_id = cur_db.execute(f"SELECT users_id, users_name FROM users WHERE telegram_id = {telegram_id} ").fetchall()
+        users_id = cur_db.execute(
+            f"SELECT users_id, users_name FROM users WHERE telegram_id = {telegram_id} ").fetchall()
 
         return users_id[0]
 
@@ -154,3 +157,16 @@ def update_work_records(work_id):
             cur_db.execute(f'UPDATE work '
                            f'SET records = "записал"'
                            f'WHERE work_id IN {tuple(work_id) if len(work_id) > 1 else f"({work_id[0]})"} ')
+
+
+def recording_work_in_excel(user_id: tuple, date_work: List[str]):
+    with sqlite3.connect(PATH_DB) as db:
+        query = f"""
+        select agent as Клиент, type_work as Тип_работ, city as Город, street as Улица, users_name as Монтажник, 
+        partner_name as Напарники, date_work as Дата_выполнения, time_repair as Время_ремонта
+        from work JOIN users u on u.users_id = work.users_id
+        where date_work between "{date_work[0]}-{date_work[1]}-00" and "{date_work[0]}-{date_work[1]}-32" and work.users_id = (select users_id from users WHERE telegram_id = {user_id[1]})"""
+        data = pd.read_sql(query, db)
+    path_file_excel = pathlib.Path.cwd() / 'working' / date_work[0] / date_work[1]
+    path_file_excel.mkdir(parents=True, exist_ok=True)
+    data.to_excel(path_file_excel / f"{user_id[0]}.xlsx", index=False)

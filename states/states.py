@@ -25,10 +25,11 @@ class AdminState(StatesGroup):
     state_maling_photo = State()
     state_maling_documents = State()
     state_maling_text = State()
+    upload_state_one = State()
+    upload_state_two = State()
 
 
 class HistoryStates:
     history_menu = State()
     records = State()
     number_records = State()
-
