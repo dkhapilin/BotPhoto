@@ -1,8 +1,9 @@
-from telebot.types import Message, ReplyKeyboardRemove
-from loader import bot
-from keyboards.inlain import selection_buttons
-from states.states import SurveyState, AdminState, AddUserState
+from telebot.types import Message
+
 from database import queries
+from keyboards.inlain import selection_buttons
+from loader import bot
+from states.states import SurveyState, AddUserState
 
 
 @bot.message_handler(commands=['start'])
@@ -30,10 +31,9 @@ def bot_start(message: Message):
                              reply_markup=selection_buttons.start_buttons_two())
 
         case _:
-            bot.send_message(message.from_user.id, f'Вас нет в списке разрешенных пользователей.'   
+            bot.send_message(message.from_user.id, f'Вас нет в списке разрешенных пользователей.'
                                                    f'Обратитесь к администратору.')
             for admin_id in queries.message_to_main_admin():
-
                 bot.send_message(f'{admin_id[0]}',
                                  f'В бот пишет {message.from_user.full_name}\n'
                                  f'ID Пользователя: {message.from_user.id}',

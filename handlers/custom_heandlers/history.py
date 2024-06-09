@@ -1,14 +1,15 @@
-from loader import bot
 from telebot.types import Message, CallbackQuery
-from states.states import HistoryStates, SurveyState
+
 from database import queries
 from keyboards.inlain import selection_buttons
+from loader import bot
+from states.states import HistoryStates, SurveyState
 
 
 @bot.message_handler(state=HistoryStates.history_menu)
 def show_history(message: Message):
     if message.text.isdigit():
-        answer = queries.history_worker(int(message.text), message.from_user.id)
+        answer = queries.history_worker_count(int(message.text), message.from_user.id)
         count = 0
         for string in answer:
             bot.send_message(message.from_user.id, f'{string[6]} {string[0]} {string[1]} {string[2]} {string[3]}\n'

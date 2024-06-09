@@ -1,5 +1,7 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 from database import queries
+from loader import bot
 
 
 def type_work():
@@ -57,27 +59,31 @@ def start_buttons_one():
 def start_buttons_two():
     keyboard = InlineKeyboardMarkup(row_width=1)
     button_maling = InlineKeyboardButton(text='Рассылка', callback_data='maling')
-    keyboard.add(button_maling)
+    button_upload_work = InlineKeyboardButton(text='Выгрузить работы', callback_data='upload_work')
+    keyboard.add(button_maling, button_upload_work)
 
     return keyboard
 
 
-def show_partner():
+def show_partner(user_id):
     keyboard = InlineKeyboardMarkup(row_width=3)
     button_null = InlineKeyboardButton(text="Делал один", callback_data='Null')
     all_partner = queries.show_worker()
+    button_all = InlineKeyboardButton(text='Все', callback_data='all')
     for num in range(0, len(all_partner), 3):
         if len(all_partner) > num + 2:
             keyboard.add(InlineKeyboardButton(text=all_partner[num][0], callback_data=all_partner[num][1]),
-                         InlineKeyboardButton(text=all_partner[num+1][0], callback_data=all_partner[num+1][1]),
-                         InlineKeyboardButton(text=all_partner[num+2][0], callback_data=all_partner[num+2][1]))
+                         InlineKeyboardButton(text=all_partner[num + 1][0], callback_data=all_partner[num + 1][1]),
+                         InlineKeyboardButton(text=all_partner[num + 2][0], callback_data=all_partner[num + 2][1]))
         elif len(all_partner) > num + 1:
             keyboard.add(InlineKeyboardButton(text=all_partner[num][0], callback_data=all_partner[num][1]),
                          InlineKeyboardButton(text=all_partner[num + 1][0], callback_data=all_partner[num + 1][1]))
         else:
             keyboard.add(InlineKeyboardButton(text=all_partner[num][0], callback_data=all_partner[num][1]))
-
-    keyboard.add(button_null)
+    if bot.get_state(user_id) == 'AdminState:upload_state_one':
+        keyboard.add(button_all)
+    else:
+        keyboard.add(button_null)
     return keyboard
 
 

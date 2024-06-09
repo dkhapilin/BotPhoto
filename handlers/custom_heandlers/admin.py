@@ -1,10 +1,10 @@
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from loader import bot
-from states.states import AdminState, AddUserState, SurveyState
+
+import keyboards
 from database import queries
 from database.queries import users_list
-import keyboards
-
+from loader import bot
+from states.states import AdminState, AddUserState, SurveyState
 
 CALL_ADMIN = ['maling']
 REPEAT = False
@@ -120,4 +120,3 @@ def maling_text(callback: CallbackQuery):
     else:
         bot.send_message(callback.from_user.id, f'Отправка отменена.', reply_markup=ReplyKeyboardRemove())
         bot.set_state(callback.from_user.id, SurveyState.main_menu, callback.message.chat.id)
-

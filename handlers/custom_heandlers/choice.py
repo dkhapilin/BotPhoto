@@ -1,8 +1,9 @@
-from loader import bot
 from telebot.types import CallbackQuery
-from states.states import SurveyState, HistoryStates, AdminState
-from keyboards.inlain import selection_buttons
+
 from handlers.custom_heandlers.history import func_records
+from keyboards.inlain import selection_buttons
+from loader import bot
+from states.states import SurveyState, HistoryStates, AdminState
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.main_menu)
@@ -24,3 +25,7 @@ def choice_main_menu(callback: CallbackQuery):
             with bot.retrieve_data(callback.message.chat.id) as data:
                 data['photo_id'] = list()
                 data['document_id'] = list()
+        case "upload_work":
+            bot.set_state(callback.from_user.id, AdminState.upload_state_one, callback.message.chat.id)
+            bot.send_message(callback.from_user.id, f'Чьи работы вы хотите выгрузить?',
+                             reply_markup=selection_buttons.show_partner(callback.from_user.id))
