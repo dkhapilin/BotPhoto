@@ -9,7 +9,9 @@ def type_work():
     button_installation = InlineKeyboardButton(text='Монтаж', callback_data='Монтаж')
     button_repair = InlineKeyboardButton(text='Ремонт', callback_data='Ремонт')
     button_dismantling = InlineKeyboardButton(text='Демонтаж', callback_data='Демонтаж')
-    keyboard.add(button_installation, button_repair, button_dismantling)
+    button_prep = InlineKeyboardButton(text='Подготовка', callback_data='Подготовка')
+    button_delivery = InlineKeyboardButton(text='Доставка', callback_data='Доставка')
+    keyboard.add(button_installation, button_prep, button_delivery, button_repair, button_dismantling)
 
     return keyboard
 
