@@ -15,7 +15,7 @@ from utils.check_and_create_directory import check_and_create_directory
 CALL_WORK = ['Монтаж', 'Ремонт', 'Демонтаж', 'Демонтаж', 'Подготовка', 'Доставка']
 CALL_AGENT = ['МТС', 'Билайн', 'Мотив', 'Мегафон', 'Столото', 'Соколов', '585 Gold', 'Санлайт', '585 Золотой']
 
-PATH_DOWNLOAD = pathlib.Path.home() / 'photo'
+PATH_DOWNLOAD = pathlib.Path.cwd().parent / 'photo'
 
 
 @bot.callback_query_handler(func=lambda callback: callback.data in CALL_WORK, state=SurveyState.type_of_work)
@@ -184,7 +184,6 @@ def repair_time_minutes(callback: CallbackQuery):
         else:
             data['repair_time'] = data['repair_time'] + callback.data + 'мин'
             bot.set_state(callback.from_user.id, SurveyState.street, callback.message.chat.id)
-            print(data['repair_time'])
             bot.send_message(callback.from_user.id,
                              f"Время ремонта записано.\n"
                              f"Нажми продолжить.",
