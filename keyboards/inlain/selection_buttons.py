@@ -69,9 +69,18 @@ def start_buttons_two():
     return keyboard
 
 
+def start_buttons_three():
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    button_manager = InlineKeyboardButton(text='Менеджер', callback_data='manager')
+    button_administrator = InlineKeyboardButton(text="Администратор", callback_data='administrator')
+    keyboard.add(button_manager, button_administrator)
+
+    return keyboard
+
+
 def show_partner(user_id):
     keyboard = InlineKeyboardMarkup(row_width=3)
-    button_null = InlineKeyboardButton(text="Делал один", callback_data='Null')
+    button_null = InlineKeyboardButton(text="Делал один", callback_data='0')
     all_partner = queries.show_worker()
     button_all = InlineKeyboardButton(text='Все', callback_data='all')
     for num in range(0, len(all_partner), 3):
@@ -147,5 +156,15 @@ def buttons_yes_or_not():
     button_yes = InlineKeyboardButton(text=f'Да', callback_data='yes')
     button_not = InlineKeyboardButton(text=f'Нет', callback_data='not')
     keyboard.add(button_yes, button_not)
+
+    return keyboard
+
+
+def buttons_admin_menu():
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    button_list_users = InlineKeyboardButton(text='Список пользователей', callback_data='list_users')
+    button_update_users = InlineKeyboardButton(text='Обновить данные пользователя', callback_data='update_users')
+    button_delete_users = InlineKeyboardButton(text='Удалить пользователя', callback_data='delete_users')
+    keyboard.add(button_list_users, button_update_users, button_delete_users)
 
     return keyboard

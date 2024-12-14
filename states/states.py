@@ -19,7 +19,7 @@ class AddUserState(StatesGroup):
     info_user = State()
 
 
-class AdminState(StatesGroup):
+class ManagerState(StatesGroup):
     state_maling_one = State()
     state_maling_two = State()
     state_maling_photo = State()
@@ -27,6 +27,13 @@ class AdminState(StatesGroup):
     state_maling_text = State()
     upload_state_one = State()
     upload_state_two = State()
+
+
+class AdminState(StatesGroup):
+    choice_access = State()
+    admin_menu = State()
+    delete_user = State()
+    update_user = State()
 
 
 class HistoryStates:
