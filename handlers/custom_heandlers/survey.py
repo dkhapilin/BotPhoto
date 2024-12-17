@@ -13,8 +13,6 @@ from loader import bot
 from states.states import SurveyState
 from utils.check_and_create_directory import check_and_create_directory
 
-CALL_WORK = ['Монтаж', 'Ремонт', 'Демонтаж', 'Подготовка', 'Доставка']
-CALL_AGENT = ['МТС', 'Билайн', 'Мотив', 'Мегафон', 'Столото', 'Соколов', '585 Gold', 'Санлайт', '585 Золотой']
 
 PATH_DOWNLOAD = pathlib.Path.cwd().parent / 'photo'
 

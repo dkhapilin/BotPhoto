@@ -166,6 +166,5 @@ def buttons_main_admin_menu():
     keyboard = InlineKeyboardMarkup(row_width=1)
     button_user = InlineKeyboardButton(text='Управление пользователями.', callback_data='users_management')
     button_client = InlineKeyboardButton(text='Управление клиентами.', callback_data='clients_management')
-    button_type_work = InlineKeyboardButton(text='Управление типами работ.', callback_data='type_work_management')
-    keyboard.add(button_user, button_client, button_type_work)
+    keyboard.add(button_user, button_client)
     return keyboard

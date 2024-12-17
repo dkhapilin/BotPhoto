@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import pandas as pd
 
-PATH_DB = pathlib.Path.cwd() / 'database' / 'data_base'
+PATH_DB = pathlib.Path.cwd() / 'database' / 'data_base.db'
 ENABLE_FOREIGN_KEY = "PRAGMA foreign_keys = ON;"
 
 

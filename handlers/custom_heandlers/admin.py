@@ -1,6 +1,7 @@
 from marshmallow import ValidationError
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 
+from utils.req import get_balance_rossko
 import keyboards
 from database import queries
 from database.queries import *
@@ -8,7 +9,7 @@ from loader import bot
 from states.states import ManagerState, AddUserState, SurveyState, AdminState
 from utils.schemas import UserSchema, ClientSchema
 
-CALL_ADMIN = ['maling']
+
 REPEAT = False
 
 
@@ -166,12 +167,6 @@ def admin_menu(callback: CallbackQuery):
                 "Снова новый заказчик?",
                 reply_markup=keyboards.inlain.selection_buttons.buttons_admin_menu_clients()
             )
-        case 'type_work_management':
-            bot.send_message(
-                callback.from_user.id,
-                'Не лезь сюда!!!\nЕщё не доделал!',
-                reply_markup=keyboards.inlain.selection_buttons.buttons_main_admin_menu()
-            )
         case 'get_client':
             all_clients = get_all_clients()
             text = 'id----name\n'
@@ -273,3 +268,10 @@ def delete_user(message: Message):
         )
     except ValidationError as err:
         bot.send_message(message.chat.id, err.messages)
+
+
+def note_rossko_balance():
+    for admin in queries.message_to_admins():
+        balance = get_balance_rossko()
+        if balance < 0:
+            bot.send_message(admin[0], f"В Росско отрицательный баланс: {balance} руб.")
