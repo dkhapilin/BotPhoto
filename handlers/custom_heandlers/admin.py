@@ -3,10 +3,10 @@ from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 
 import keyboards
 from database import queries
-from database.queries import users_list, users_list_for_admin, update_user_in_db, deleted_user_in_db
+from database.queries import *
 from loader import bot
 from states.states import ManagerState, AddUserState, SurveyState, AdminState
-from utils.schemas import UserSchema
+from utils.schemas import UserSchema, ClientSchema
 
 CALL_ADMIN = ['maling']
 REPEAT = False
@@ -128,26 +128,105 @@ def maling_text(callback: CallbackQuery):
 def admin_menu(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.id)
     data = callback.data
-    if data == 'list_users':
-        members = users_list_for_admin()
-        text_members = 'Права доступа 1-монтажник, 2-менеджер, 3-администратор.\n'
-        for member in members:
-            text_members += f'id-{member[0]}; ФИО-{member[1]}; права-{member[2]}; telegram_id-{member[3]}\n'
-        bot.send_message(callback.from_user.id, text_members)
-    elif data == 'delete_users':
-        bot.set_state(callback.from_user.id, AdminState.delete_user)
-        bot.send_message(callback.from_user.id, f"Укажите telegram_id;ФИО;права пользователя, которого хотите удалить.")
-    elif data == 'update_users':
-        text = """
-        Форма замены данных:
-        telegram_id;ФИО;права
-        Пример:
-        1235678;Иванов И.И.;2
-        То что не нужно менять, укажите текущие данные.
-        ВАЖНО - telegram_id менять нельзя. Точка с запятой обязательны для разделения данных.
-        """
-        bot.set_state(callback.from_user.id, AdminState.update_user)
-        bot.send_message(callback.from_user.id, text)
+    match data:
+        case 'list_users':
+            members = users_list_for_admin()
+            text_members = 'Права доступа 1-монтажник, 2-менеджер, 3-администратор.\n'
+            for member in members:
+                text_members += f'id-{member[0]}; ФИО-{member[1]}; права-{member[2]}; telegram_id-{member[3]}\n'
+            bot.send_message(
+                callback.from_user.id,
+                text_members,
+                reply_markup=keyboards.inlain.selection_buttons.buttons_admin_menu_users()
+            )
+        case 'delete_users':
+            bot.set_state(callback.from_user.id, AdminState.delete_user)
+            bot.send_message(callback.from_user.id,
+                             f"Укажите telegram_id;ФИО;права пользователя, которого хотите удалить.")
+        case 'update_users':
+            text = """
+            Форма замены данных:\n
+            telegram_id;ФИО;права\n
+            Пример:\n
+            1235678;Иванов И.И.;2\n
+            То что не нужно менять, укажите текущие данные.\n
+            ВАЖНО - telegram_id менять нельзя. \nТочка с запятой обязательны для разделения данных.
+            """
+            bot.set_state(callback.from_user.id, AdminState.update_user)
+            bot.send_message(callback.from_user.id, text)
+        case 'users_management':
+            bot.send_message(
+                callback.from_user.id,
+                "Что ты хочешь сделать с этими неудачниками?",
+                reply_markup=keyboards.inlain.selection_buttons.buttons_admin_menu_users()
+            )
+        case 'clients_management':
+            bot.send_message(
+                callback.from_user.id,
+                "Снова новый заказчик?",
+                reply_markup=keyboards.inlain.selection_buttons.buttons_admin_menu_clients()
+            )
+        case 'type_work_management':
+            bot.send_message(
+                callback.from_user.id,
+                'Не лезь сюда!!!\nЕщё не доделал!',
+                reply_markup=keyboards.inlain.selection_buttons.buttons_main_admin_menu()
+            )
+        case 'get_client':
+            all_clients = get_all_clients()
+            text = 'id----name\n'
+            for client in all_clients:
+                text += f'{client.id}----{client.name}\n'
+            bot.send_message(callback.from_user.id, text)
+        case 'add_new_client':
+            bot.set_state(callback.from_user.id, AdminState.add_client, callback.message.chat.id)
+            bot.send_message(callback.from_user.id, "Напишите название новой организации.")
+        case 'delete_client':
+            bot.set_state(callback.from_user.id, AdminState.delete_client, callback.message.chat.id)
+            bot.send_message(callback.from_user.id, "Напишите данные организации по форме ниже.\n"
+                                                    "id;name\n"
+                                                    "Обязательно через точку с запятой.")
+
+
+@bot.message_handler(state=AdminState.delete_client)
+def delete_client(message: Message):
+    data = message.text.split(";")
+    data_json = {
+        "id": data[0],
+        "name": data[1],
+    }
+    schema = ClientSchema()
+    try:
+        schema.load(data_json)
+        bot.send_message(message.from_user.id, 'Не нашли такие данные. Попробуй ещё раз.')
+    except ValidationError as err:
+        client = schema.create_client(data_json)
+        delete_client_from_db(client.id)
+        bot.set_state(message.from_user.id, AdminState.choice_access, message.chat.id)
+        bot.send_message(
+            message.from_user.id,
+            f"Клиент {data[0]} {data[1]} удален.",
+            reply_markup=keyboards.inlain.selection_buttons.start_buttons_three()
+        )
+
+
+@bot.message_handler(state=AdminState.add_client)
+def add_new_client(message: Message):
+    data = {
+        'name': message.text
+    }
+    schema = ClientSchema()
+    try:
+        client = schema.load(data)
+        new_client = add_client_to_db(client)
+        bot.set_state(message.from_user.id, AdminState.choice_access, message.chat.id)
+        bot.send_message(
+            message.chat.id,
+            f"Добавлен новый клиент.\n{new_client.name}, id - {new_client.id}",
+            reply_markup=keyboards.inlain.selection_buttons.start_buttons_three()
+        )
+    except ValidationError as err:
+        bot.send_message(message.chat.id, f"{err.messages}")
 
 
 @bot.message_handler(state=AdminState.update_user)
@@ -162,9 +241,12 @@ def update_user(message: Message):
     try:
         user = schema.load(data_json)
         new_user = update_user_in_db(user)
+        bot.set_state(message.from_user.id, AdminState.choice_access, message.chat.id)
         bot.send_message(message.from_user.id,
                          f'Новые данные:\n'
-                         f'ФИО-{new_user.users_name}, Права-{new_user.access}')
+                         f'ФИО-{new_user.users_name}, Права-{new_user.access}',
+                         reply_markup=keyboards.inlain.selection_buttons.start_buttons_three()
+                         )
         bot.send_message(new_user.telegram_id, f'Ваши данные обновлены:\n'
                                                f'ФИО-{new_user.users_name}, Права-{new_user.access}')
     except ValidationError as err:
@@ -183,6 +265,11 @@ def delete_user(message: Message):
     try:
         user = schema.load(data_json)
         answer = deleted_user_in_db(user)
-        bot.send_message(message.from_user.id, answer)
+        bot.set_state(message.from_user.id, AdminState.choice_access, message.chat.id)
+        bot.send_message(
+            message.from_user.id,
+            answer,
+            reply_markup=keyboards.inlain.selection_buttons.start_buttons_three()
+        )
     except ValidationError as err:
         bot.send_message(message.chat.id, err.messages)

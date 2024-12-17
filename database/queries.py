@@ -18,6 +18,26 @@ class User:
     users_id: Optional[int] = None
 
 
+@dataclass
+class Work:
+    client_id: str
+    type_work: str
+    city: str
+    street: str
+    users_id: int
+    date_work: str
+    time_repair: Optional[str] = None
+    records: Optional[str] = None
+    partner_name: Optional[str] = None
+    work_id: Optional[int] = None
+
+
+@dataclass
+class Client:
+    name: str
+    id: Optional[int] = None
+
+
 create_table_users = """
 CREATE TABLE users(
     users_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,10 +47,17 @@ CREATE TABLE users(
 )
 """
 
+create_table_client = """
+CREATE TABLE clients(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+    )
+"""
+
 create_table_work = """
 CREATE TABLE work(
     work_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    agent TEXT NOT NULL,
+    client_id TEXT NOT NULL,
     type_work TEXT NOT NULL,
     city TEXT NOT NULL,
     street TEXT NOT NULL,
@@ -39,9 +66,19 @@ CREATE TABLE work(
     records TEXT,
     date_work TEXT NOT NULL,
     time_repair TEXT,
-    FOREIGN KEY (users_id) REFERENCES users(users_id)
+    FOREIGN KEY (users_id) REFERENCES users(users_id),
+    FOREIGN KEY (client_id) REFERENCES clients(id)
     )
 """
+
+
+def _get_obj_client(rows: tuple) -> Client:
+    """
+    Под нулевым индексом передавать ID, под первым name.
+    :param rows:
+    :return:
+    """
+    return Client(id=rows[0], name=rows[1])
 
 
 def checking_exist_table(conn: sqlite3.Connection, table_name: str) -> bool:
@@ -59,10 +96,13 @@ def init_db():
     with sqlite3.connect(PATH_DB) as conn:
         exist_table_users = checking_exist_table(conn, "users")
         exist_table_work = checking_exist_table(conn, "work")
+        exist_table_client = checking_exist_table(conn, "clients")
         conn.execute(ENABLE_FOREIGN_KEY)
         cursor = conn.cursor()
         if not exist_table_users:
             cursor.executescript(create_table_users)
+        if not exist_table_client:
+            cursor.executescript(create_table_client)
         if not exist_table_work:
             cursor.executescript(create_table_work)
 
@@ -153,15 +193,15 @@ def history_worker_count(limit: int, telegram_id: int):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         user_id, users_name = search_user_id(telegram_id)
-        answer = cur_db.execute(f"SELECT agent, type_work, city, street, users_name, partner_name, "
+        answer = cur_db.execute(f"SELECT client_id, type_work, city, street, users_name, partner_name, "
                                 f"date_work, time_repair "
-                                f"FROM (SELECT agent, type_work, city, street, users_name, partner_name, "
+                                f"FROM (SELECT client_id, type_work, city, street, users_name, partner_name, "
                                 f"date_work, time_repair "
                                 f"FROM work w inner join users u on u.users_id = w.users_id "
                                 f"WHERE w.users_id = ? "
                                 f"ORDER BY work_id DESC "
                                 f"LIMIT ?) as new_table "
-                                f"ORDER BY type_work, agent ", (user_id, limit)).fetchall()
+                                f"ORDER BY type_work, client_id ", (user_id, limit)).fetchall()
 
         return answer
 
@@ -175,7 +215,7 @@ def show_worker():
         return answer
 
 
-def append_work(telegram_id, agent, type_work, city, street, partner_id, time_repair=None):
+def append_work(telegram_id, client_id, type_work, city, street, partner_id, time_repair=None):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         users_id, _ = search_user_id(telegram_id)
@@ -200,10 +240,10 @@ def append_work(telegram_id, agent, type_work, city, street, partner_id, time_re
             cur_db.execute(
                 f"""
                 INSERT INTO work 
-                (agent, type_work, city, street, users_id, partner_name,date_work, time_repair)
+                (client_id, type_work, city, street, users_id, partner_name,date_work, time_repair)
                 VALUES (?, ?, ?, ?, ?, ?, ?,?)
                 """,
-                (agent, type_work, city, street, us_i, fio_partner, date,
+                (client_id, type_work, city, street, us_i, fio_partner, date,
                  time_repair if type_work == 'Ремонт' else 'Null')
             )
 
@@ -221,15 +261,15 @@ def record_worker(telegram_id: int):
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
         user_id, users_name = search_user_id(telegram_id)
-        answer = cur_db.execute(f"SELECT work_id, agent, type_work, city, street, users_name, partner_name, "
+        answer = cur_db.execute(f"SELECT work_id, client_id, type_work, city, street, users_name, partner_name, "
                                 f"date_work, time_repair "
-                                f"FROM (SELECT work_id, agent, type_work, city, street, users_name, partner_name, "
+                                f"FROM (SELECT work_id, client_id, type_work, city, street, users_name, partner_name, "
                                 f"date_work, time_repair "
                                 f"FROM work w inner join users u on u.users_id = w.users_id "
                                 f"WHERE w.users_id = {user_id} AND records IS NULL "
                                 f"ORDER BY work_id DESC "
                                 f") as new_table "
-                                f"ORDER BY type_work, agent ").fetchall()
+                                f"ORDER BY type_work, client_id ").fetchall()
 
         return answer
 
@@ -246,11 +286,15 @@ def update_work_records(work_id):
 def recording_work_in_excel(user_id: tuple, date_work: List[str]):
     with sqlite3.connect(PATH_DB) as db:
         query = f"""
-        select agent as Клиент, type_work as Тип_работ, city as Город, street as Улица, users_name as Монтажник, 
+        SELECT c.name as Клиент, type_work as Тип_работ, city as Город, street as Улица, users_name as Монтажник, 
         partner_name as Напарники, date_work as Дата_выполнения, time_repair as Время_ремонта
-        from work JOIN users u on u.users_id = work.users_id
-        where date_work between "{date_work[0]}-{date_work[1]}-00" and "{date_work[0]}-{date_work[1]}-32" 
-        and work.users_id = (select users_id from users WHERE telegram_id = {user_id[1]})"""
+        FROM work 
+        JOIN users u on u.users_id = work.users_id
+        JOIN clients c on c.id = work.client_id
+        where date_work BETWEEN "{date_work[0]}-{date_work[1]}-00" AND "{date_work[0]}-{date_work[1]}-32" 
+        AND work.users_id = (SELECT users_id 
+                                FROM users 
+                                WHERE telegram_id = {user_id[1]})"""
         data = pd.read_sql(query, db)
     path_file_excel = pathlib.Path.cwd() / 'working' / date_work[0] / date_work[1]
     path_file_excel.mkdir(parents=True, exist_ok=True)
@@ -271,6 +315,18 @@ def check_user_by_telegram_id(telegram_id: int) -> bool:
             return True
 
 
+def get_user_by_telegram_id(telegram_id: int) -> User:
+    with sqlite3.connect(PATH_DB) as db:
+        cur_db = db.cursor()
+        cur_db.execute(
+            """
+            SELECT users_name, telegram_id, access FROM users WHERE telegram_id = ?
+            """, (telegram_id,)
+        )
+        row = cur_db.fetchone()
+    return User(users_name=row[0], telegram_id=row[1], access=row[2])
+
+
 def update_user_in_db(user: User) -> User:
     with sqlite3.connect(PATH_DB) as db:
         cur_db = db.cursor()
@@ -284,3 +340,65 @@ def update_user_in_db(user: User) -> User:
         user.users_id = cur_db.lastrowid
 
         return user
+
+
+def get_client_by_id(client_id: int) -> Client:
+    with sqlite3.connect(PATH_DB) as db:
+        cur_db = db.cursor()
+        cur_db.execute(
+            """
+            SELECT id, name FROM clients WHERE id = ?
+            """, (client_id,)
+        )
+        return _get_obj_client(cur_db.fetchone())
+
+
+def get_client_by_name(name: str) -> Client:
+    with sqlite3.connect(PATH_DB) as db:
+        cur_db = db.cursor()
+        cur_db.execute(
+            """
+            SELECT id, name FROM clients WHERE name = ?
+            """, (name,)
+        )
+        result = cur_db.fetchone()
+        if result:
+            return _get_obj_client(result)
+
+
+def add_client_to_db(client: Client):
+    with sqlite3.connect(PATH_DB) as db:
+        cur_db = db.cursor()
+        cur_db.execute(
+            """
+            INSERT INTO clients (name)
+            VALUES (?)
+            """, (client.name,)
+        )
+        client.id = cur_db.lastrowid
+        return client
+
+
+def get_all_clients() -> List[Client]:
+    with sqlite3.connect(PATH_DB) as db:
+        cur_db = db.cursor()
+        cur_db.execute(
+            """
+            SELECT id, name FROM clients
+            """
+        )
+        all_clients: List[Client] = []
+        for row in cur_db.fetchall():
+            all_clients.append(_get_obj_client(row))
+
+        return all_clients
+
+
+def delete_client_from_db(client_id: int):
+    with sqlite3.connect(PATH_DB) as db:
+        cur_db = db.cursor()
+        cur_db.execute(
+            """
+            DELETE FROM clients WHERE id = ?
+            """, (client_id,)
+        )

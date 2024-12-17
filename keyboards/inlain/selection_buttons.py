@@ -1,6 +1,7 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from typing import List
 from database import queries
+from database.queries import Client
 from loader import bot
 
 
@@ -16,27 +17,10 @@ def type_work():
     return keyboard
 
 
-def client_buttons():
+def client_buttons(clients: List[Client]):
     keyboard = InlineKeyboardMarkup(row_width=1)
-    button_mts = InlineKeyboardButton(text='МТС', callback_data='МТС')
-    button_bilain = InlineKeyboardButton(text='Билайн', callback_data='Билайн')
-    button_motiv = InlineKeyboardButton(text='Мотив', callback_data='Мотив')
-    button_megafon = InlineKeyboardButton(text='Мегафон', callback_data='Мегафон')
-    button_stoloto = InlineKeyboardButton(text='Столото', callback_data='Столото')
-    button_sokolov = InlineKeyboardButton(text='Соколов', callback_data='Соколов')
-    button_585 = InlineKeyboardButton(text='585 Gold', callback_data='585 Gold')
-    button_sunlight = InlineKeyboardButton(text='Санлайт', callback_data='Санлайт')
-    button_585_zolotoy = InlineKeyboardButton(text='585 Золотой', callback_data='585 Золотой')
-
-    keyboard.add(button_mts,
-                 button_bilain,
-                 button_megafon,
-                 button_motiv,
-                 button_stoloto,
-                 button_sokolov,
-                 button_585,
-                 button_sunlight,
-                 button_585_zolotoy)
+    for client in clients:
+        keyboard.add(InlineKeyboardButton(text=client.name, callback_data=client.id))
 
     return keyboard
 
@@ -53,9 +37,8 @@ def add_user_button(id_user):
 def start_buttons_one():
     keyboard = InlineKeyboardMarkup(row_width=1)
     button_client = InlineKeyboardButton(text='Отправить фото', callback_data='photo')
-    button_history = InlineKeyboardButton(text='Посмотреть историю работ.', callback_data='history_unique')
-    button_history_records = InlineKeyboardButton(text='Не записанные работы', callback_data='dont_records')
-    keyboard.add(button_client, button_history, button_history_records)
+    button_history = InlineKeyboardButton(text='Скачать работы.', callback_data='history_unique')
+    keyboard.add(button_client, button_history)
 
     return keyboard
 
@@ -93,7 +76,7 @@ def show_partner(user_id):
                          InlineKeyboardButton(text=all_partner[num + 1][0], callback_data=all_partner[num + 1][1]))
         else:
             keyboard.add(InlineKeyboardButton(text=all_partner[num][0], callback_data=all_partner[num][1]))
-    if bot.get_state(user_id) == 'AdminState:upload_state_one':
+    if bot.get_state(user_id) == 'ManagerState:upload_state_one':
         keyboard.add(button_all)
     else:
         keyboard.add(button_null)
@@ -160,11 +143,29 @@ def buttons_yes_or_not():
     return keyboard
 
 
-def buttons_admin_menu():
+def buttons_admin_menu_users():
     keyboard = InlineKeyboardMarkup(row_width=1)
     button_list_users = InlineKeyboardButton(text='Список пользователей', callback_data='list_users')
     button_update_users = InlineKeyboardButton(text='Обновить данные пользователя', callback_data='update_users')
     button_delete_users = InlineKeyboardButton(text='Удалить пользователя', callback_data='delete_users')
     keyboard.add(button_list_users, button_update_users, button_delete_users)
 
+    return keyboard
+
+
+def buttons_admin_menu_clients():
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    button_get_client = InlineKeyboardButton(text='Показать всех клиентов.', callback_data='get_client')
+    button_add_client = InlineKeyboardButton(text='Добавить нового клиента.', callback_data='add_new_client')
+    button_delete_client = InlineKeyboardButton(text='Удалить клиента.', callback_data='delete_client')
+    keyboard.add(button_get_client, button_add_client, button_delete_client)
+    return keyboard
+
+
+def buttons_main_admin_menu():
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    button_user = InlineKeyboardButton(text='Управление пользователями.', callback_data='users_management')
+    button_client = InlineKeyboardButton(text='Управление клиентами.', callback_data='clients_management')
+    button_type_work = InlineKeyboardButton(text='Управление типами работ.', callback_data='type_work_management')
+    keyboard.add(button_user, button_client, button_type_work)
     return keyboard

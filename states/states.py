@@ -34,6 +34,8 @@ class AdminState(StatesGroup):
     admin_menu = State()
     delete_user = State()
     update_user = State()
+    add_client = State()
+    delete_client = State()
 
 
 class HistoryStates:

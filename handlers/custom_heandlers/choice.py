@@ -15,7 +15,7 @@ def choice_main_menu(callback: CallbackQuery):
             bot.send_message(callback.from_user.id, f'Выбери вид работ.', reply_markup=selection_buttons.type_work())
         case 'history_unique':
             bot.set_state(callback.from_user.id, HistoryStates.history_menu, callback.message.chat.id)
-            bot.send_message(callback.from_user.id, f'Напиши сколько последних работ тебе показать.')
+            bot.send_message(callback.from_user.id, f'Укажи год и месяц.\n Пример:\n 2023-12.')
         case 'dont_records':
             bot.set_state(callback.from_user.id, HistoryStates.records, callback.message.chat.id)
             func_records(callback.from_user.id)
@@ -44,7 +44,7 @@ def choice_access(callback: CallbackQuery):
         bot.send_message(
             callback.from_user.id,
             "Меню администратора",
-            reply_markup=selection_buttons.buttons_admin_menu()
+            reply_markup=selection_buttons.buttons_main_admin_menu()
         )
 
     else:

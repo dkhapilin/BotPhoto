@@ -5,6 +5,7 @@ from datetime import datetime
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 
 from database import queries
+from database.queries import get_client_by_id, get_all_clients
 from keyboards.inlain.selection_buttons import (client_buttons, show_partner, number,
                                                 button_next, hours_button, minutes_button)
 from keyboards.reply.button_exit import button_exit
@@ -12,13 +13,13 @@ from loader import bot
 from states.states import SurveyState
 from utils.check_and_create_directory import check_and_create_directory
 
-CALL_WORK = ['Монтаж', 'Ремонт', 'Демонтаж', 'Демонтаж', 'Подготовка', 'Доставка']
+CALL_WORK = ['Монтаж', 'Ремонт', 'Демонтаж', 'Подготовка', 'Доставка']
 CALL_AGENT = ['МТС', 'Билайн', 'Мотив', 'Мегафон', 'Столото', 'Соколов', '585 Gold', 'Санлайт', '585 Золотой']
 
 PATH_DOWNLOAD = pathlib.Path.cwd().parent / 'photo'
 
 
-@bot.callback_query_handler(func=lambda callback: callback.data in CALL_WORK, state=SurveyState.type_of_work)
+@bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.type_of_work)
 def choice_client(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
 
@@ -26,16 +27,16 @@ def choice_client(callback: CallbackQuery):
         data['type_work'] = callback.data
     bot.send_message(callback.from_user.id,
                      'Выберите заказчика.',
-                     reply_markup=client_buttons())
+                     reply_markup=client_buttons(get_all_clients()))
     bot.set_state(callback.from_user.id, SurveyState.client, callback.message.chat.id)
 
 
-@bot.callback_query_handler(func=lambda callback: callback.data in CALL_AGENT, state=SurveyState.client)
+@bot.callback_query_handler(func=lambda callback: callback.data, state=SurveyState.client)
 def choice_city(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
 
     with bot.retrieve_data(callback.message.chat.id) as data:
-        data['client'] = callback.data
+        data['client_id'] = callback.data
     bot.set_state(callback.from_user.id, SurveyState.city, callback.message.chat.id)
     bot.send_message(callback.from_user.id, f'Напиши город.')
 
@@ -111,7 +112,7 @@ def album(callback: CallbackQuery):
     bot.delete_message(callback.message.chat.id, callback.message.message_id)
     with bot.retrieve_data(callback.message.chat.id) as data:
         file_type_work = data.get('type_work')
-        file_client = data.get('client')
+        file_client = get_client_by_id(data.get('client_id')).name
         file = f'{data.get("city")}, {data.get("street")}, {callback.from_user.full_name}'
         data_save = datetime.now()
         path = pathlib.Path.absolute(PATH_DOWNLOAD) / data_save.strftime('%Y') / data_save.strftime(
@@ -151,12 +152,13 @@ def download_photo(message: Message):
                 file_o.write(dwn_photo)
     elif message.text.lower() == 'фотоотчет отправлен.':
         with bot.retrieve_data(message.chat.id) as data:
+            name_client = get_client_by_id(data.get('client_id')).name
             for admin in queries.message_to_admins():
                 bot.send_message(f'{admin[0]}', f'Пришел новый фотоотчет.\n'
-                                                f'{data["type_work"]} {data["client"]} {data["city"]}, {data["street"]},'
+                                                f'{data["type_work"]} {name_client} {data["city"]}, {data["street"]},'
                                                 f'{message.from_user.full_name}.')
             queries.append_work(message.from_user.id,
-                                data['client'],
+                                data['client_id'],
                                 data['type_work'],
                                 data['city'],
                                 data['street'],

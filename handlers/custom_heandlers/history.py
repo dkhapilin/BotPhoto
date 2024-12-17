@@ -1,5 +1,5 @@
 from telebot.types import Message, CallbackQuery
-
+from handlers.custom_heandlers.upload_works import create_excel_multithreading, sending_excel
 from database import queries
 from keyboards.inlain import selection_buttons
 from loader import bot
@@ -8,24 +8,12 @@ from states.states import HistoryStates, SurveyState
 
 @bot.message_handler(state=HistoryStates.history_menu)
 def show_history(message: Message):
-    if message.text.isdigit():
-        answer = queries.history_worker_count(int(message.text), message.from_user.id)
-        count = 0
-        for string in answer:
-            bot.send_message(message.from_user.id, f'{string[6]} {string[0]} {string[1]} {string[2]} {string[3]}\n'
-                                                   f'{string[5]}\n'
-                                                   f'{f"Время ремонта {string[7]}" if string[1] == "Ремонт" else ""}')
-            count += 1
-
-        bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
-        if count == int(message.text):
-            bot.send_message(message.from_user.id, f'Это {count} последних твоих работ.',
-                             reply_markup=selection_buttons.start_buttons_one())
-        else:
-            bot.send_message(message.from_user.id, f'У тебя пока только {count} выполненных работ.',
-                             reply_markup=selection_buttons.start_buttons_one())
-    else:
-        bot.send_message(message.from_user.id, f"Введи число.")
+    data = message.text.split("-")
+    user = queries.get_user_by_telegram_id(message.from_user.id)
+    create_excel_multithreading([(user.users_name, user.telegram_id)], data)
+    for ex in sending_excel([(user.users_name, user.telegram_id)], data):
+        bot.send_document(message.chat.id, document=open(ex, "rb"))
+    bot.delete_state(message.from_user.id)
 
 
 def func_records(user_id):
