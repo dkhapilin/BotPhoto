@@ -1,7 +1,7 @@
 import pathlib
 import re
 from datetime import datetime
-
+from utils import send_email
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 
 from database import queries
@@ -12,7 +12,6 @@ from keyboards.reply.button_exit import button_exit
 from loader import bot
 from states.states import SurveyState
 from utils.check_and_create_directory import check_and_create_directory
-
 
 PATH_DOWNLOAD = pathlib.Path.cwd().parent / 'photo'
 
@@ -162,6 +161,7 @@ def download_photo(message: Message):
                                 data['street'],
                                 data['partner_id'],
                                 data.get('repair_time'))
+            send_email.send_email("dkhapilin.gmail.com", str(data['path']))
             bot.delete_message(message.chat.id, message.message_id)
             bot.send_message(message.from_user.id, f"До скорой встречи!", reply_markup=ReplyKeyboardRemove())
             bot.set_state(message.from_user.id, SurveyState.main_menu, message.chat.id)
