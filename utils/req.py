@@ -16,6 +16,6 @@ def get_balance_rossko():
     data = helpers.serialize_object(response, dict)
 
     info = data.get("Info")
-    balance = int(info.get("balance"))
+    balance = float(info.get("balance"))
 
     return balance

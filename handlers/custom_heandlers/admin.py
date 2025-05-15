@@ -273,5 +273,7 @@ def delete_user(message: Message):
 def note_rossko_balance():
     for admin in queries.message_to_admins():
         balance = get_balance_rossko()
+        print(balance, admin)
         if balance < 0:
+            print('Отправка')
             bot.send_message(admin[0], f"В Росско отрицательный баланс: {balance} руб.")

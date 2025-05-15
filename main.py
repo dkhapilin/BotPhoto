@@ -16,11 +16,11 @@ def schedule_checker():
 
 
 if __name__ == '__main__':
-    schedule.every().day.at("10:00").do(handlers.custom_heandlers.admin.note_rossko_balance)
+    schedule.every().day.at("14:30").do(handlers.custom_heandlers.admin.note_rossko_balance)
 
     thread = threading.Thread(target=schedule_checker).start()
 
     init_db()
     bot.add_custom_filter(StateFilter(bot))
     set_default_commands(bot)
-    bot.infinity_polling()
+    bot.polling()
